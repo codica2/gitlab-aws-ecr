@@ -48,9 +48,9 @@ sudo apt-get install gitlab-runner
 ## Configure GitLab Runner
 
 Now go to your bastion host and run ``` sudo gitlab-runner register ``` 
-Paste settings from Your GitLab project. It will generate file with token we needed for our runner.
+This command will generate example ``` config.toml ``` file with token we needed for our runner.
 
-Then run ``` sudo vim /etc/gitlab-runner/config.toml ``` copy generated token to buffer and paste here new config
+Then run ``` sudo vim /etc/gitlab-runner/config.toml ``` and copy generated token to buffer. Then paste it into your new config which is given below.
 
 
 ```
@@ -58,8 +58,8 @@ concurrent = 10
 check_interval = 0
 
 [[runners]]
-  name = "REW TEST Runner"
-  limit = 10
+  name = "%PROJECT_NAME% Runner"
+  limit = 3
   url = "https://gitlab.codica.com/"
   token = "__TOKEN FROM PREVIOUS config.toml__"
   executor = "docker+machine"
@@ -77,15 +77,15 @@ check_interval = 0
       ServerAddress = "s3.amazonaws.com"
       AccessKey = "XXXXXXXXX"
       SecretKey = "XXXXXXXXX"
-      BucketName = "XXXXXXXX"
+      BucketName = "XXXXXXXXX"
       BucketLocation = "eu-central-1"
   [runners.machine]
-    IdleCount = 3
+    IdleCount = 2
     IdleTime = 300
     MaxBuilds = 10
     MachineDriver = "amazonec2"
     MachineName = "gitlab-docker-machine-%s"
-    MachineOptions = ["amazonec2-access-key=XXXXXXXXX", "amazonec2-secret-key=XXXXXXXXX", "amazonec2-region=eu-central-1", "amazonec2-vpc-id=vpc-0163a66b", "amazonec2-subnet-id=subnet-c6908bbb", "amazonec2-zone=b", "amazonec2-tags=runner-manager-name,gitlab-aws-autoscaler,gitlab,true,gitlab-runner-autoscale,true", "amazonec2-security-group=SSH Bastion Group", "amazonec2-instance-type=t3.medium", "amazonec2-request-spot-instance=true", "amazonec2-spot-price=0.05"]
+    MachineOptions = ["amazonec2-access-key=XXXXXXXXX", "amazonec2-secret-key=XXXXXXXXX", "amazonec2-region=eu-central-1", "amazonec2-vpc-id=XXXXXXXXX", "amazonec2-subnet-id=XXXXXXXXX", "amazonec2-zone=%bastion host zone%", "amazonec2-tags=runner-manager-name,gitlab-aws-autoscaler,gitlab,true,gitlab-runner-autoscale,true", "amazonec2-security-group=%Your SG name%", "amazonec2-instance-type=t3.medium", "amazonec2-request-spot-instance=true", "amazonec2-spot-price=0.05"]
     OffPeakPeriods = ["* * 0-8,22-23 * * mon-fri *", "* * * * * sat,sun *"]
     OffPeakTimezone = "Europe/Kiev"
     OffPeakIdleCount = 0
@@ -93,9 +93,9 @@ check_interval = 0
 
 ```
 ## ECR login stage
-
-The next step is configure our AWS account ``` sudo aws configure ```
-Then go to  ```sudo crontab -e ``` and paste it into: 
+Make sure you are under root user:  ```sudo su ```
+The next step is configure our AWS account: ``` aws configure ```
+Then type:  ``` crontab -e ``` and paste next string to the end of crontab: 
 ``` 0 */6 * * * RESULT=$(aws ecr get-login --no-include-email --region eu-central-1) && $RESULT >/dev/null 2>&1 ```
 
 [Read the official documentation](https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/#introduction) about Autoscaling GitLab Runner on AWS.
