@@ -96,7 +96,7 @@ check_interval = 0
 
 The next step is configure our AWS account ``` sudo aws configure ```
 Then go to  ```sudo crontab -e ``` and paste it into: 
-``` 0 */12 1 * * RESULT=$(aws ecr get-login --no-include-email --region eu-central-1) & $RESULT ```
+``` 0 */6 * * * RESULT=$(aws ecr get-login --no-include-email --region eu-central-1) && $RESULT >/dev/null 2>&1 ```
 
 [Read the official documentation](https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/#introduction) about Autoscaling GitLab Runner on AWS.
 
