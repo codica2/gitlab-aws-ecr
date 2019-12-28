@@ -17,7 +17,7 @@ The first step is to install GitLab Runner in an EC2 instance that will serve as
 
 Security Group for Bastion host must contain ingress rule for 2376 port
 
-To create EC2 instance with all depencies installed - paste this into User Data 
+To create EC2 instance (Ubuntu HVM) with all depencies installed - paste this into User Data 
 ```
 #!/bin/bash
 sudo apt-get update
