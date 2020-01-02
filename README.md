@@ -3,7 +3,8 @@
 ![](gitlab-docker-aws.png)
 
 If you want to have a cost-effective and scalable solution for you CI/CD, it can be useful to use Gitlab Runner with its autoscaling feature.
-In this example, we'll show how to configure a Gitlab Runner in AWS that will serve as the bastion where it will spawn new Docker machines on demand.
+In this example, we`ll configure Gitlab Runner in AWS that will serve as the bastion host with docker-machine spawning spot instances also there is ECR authentication stage (in this case we can pull our images from ECR).
+
 
 ## Prerequisites 
 
@@ -22,6 +23,8 @@ To create EC2 instance (Ubuntu HVM) with all depencies installed - paste this in
 #!/bin/bash
 sudo apt-get update
 sudo apt-get upgrade
+
+#installing docker depencies
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository \
@@ -29,18 +32,28 @@ add-apt-repository \
    $(lsb_release -cs) \
    stable"
 sudo apt-get update
+
+#installing docker with user rights
 sudo apt-get install -y docker-ce
 sudo usermod -aG docker ubuntu
+
+#installing awsutils with Go laguage
 sudo apt-get install awscli
 sudo apt-get install golang-go
+
+#export Go $PATH 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
+
+#installing docker-compose + machine
 curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 base=https://github.com/docker/machine/releases/download/v0.16.0 &&
   curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
   sudo mv /tmp/docker-machine /usr/local/bin/docker-machine &&
   chmod +x /usr/local/bin/docker-machine
+
+#installing gitlab-runner
 curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash
 sudo apt-get install gitlab-runner
 
@@ -98,7 +111,6 @@ The next step is configure our AWS account: ``` aws configure ```
 Then type:  ``` crontab -e ``` and paste next string to the end of crontab: 
 ``` 0 */6 * * * RESULT=$(aws ecr get-login --no-include-email --region eu-central-1) && $RESULT >/dev/null 2>&1 ```
 
-[Read the official documentation](https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/#introduction) about Autoscaling GitLab Runner on AWS.
 
 ## License
 Copyright © 2015-2019 Codica. It is released under the [MIT License](https://opensource.org/licenses/MIT).
