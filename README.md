@@ -105,15 +105,19 @@ check_interval = 0
     OffPeakIdleTime = 1200
 
 ```
+
+
 ## ECR login stage
+
 Make sure you are under root user:  ```sudo su ```
 The next step is configure our AWS account: ``` aws configure ```
 Then type:  ``` crontab -e ``` and paste next string to the end of crontab: 
 ``` 0 */6 * * * RESULT=$(aws ecr get-login --no-include-email --region eu-central-1) && $RESULT >/dev/null 2>&1 ```
 
+By default for ECR authorization is used ECR Credential Helper. [Here](https://github.com/awslabs/amazon-ecr-credential-helper) you can find detailed instructions for authorization in ECR.
 
 ## License
-Copyright © 2015-2019 Codica. It is released under the [MIT License](https://opensource.org/licenses/MIT).
+Copyright © 2015-2020 Codica. It is released under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## About Codica
 
